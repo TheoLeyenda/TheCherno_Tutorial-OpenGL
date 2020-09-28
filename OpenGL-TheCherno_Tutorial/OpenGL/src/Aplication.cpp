@@ -114,20 +114,38 @@ int main(void)
 
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
-	float positions[6]
+	float positions[]
 	{
-		-0.5f, -0.5f,
-		  0,    0.5f,
-		 0.5f, -0.5f
+		-0.5f, -0.5f, //index 0
+		 0.5f, -0.5f, //index 1
+		 0.5f,  0.5f, //index 2
+		-0.5f,  0.5f, //index 3
 	};
+	
+	const int countPositions = 8;
+	const int stride = 2; // cantidad 
+	const int offset = sizeof(float) * 2; // 
+	const int countVetices = 4;
+
+	unsigned int indexBuffer[] = 
+	{
+		0, 1, 2,
+		2, 3, 0
+	};
+	const int countIndexBuffer = 6;
 
 	unsigned int buffer;
 	glGenBuffers(1, &buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float),positions , GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, countPositions * sizeof(float),positions , GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+	glVertexAttribPointer(0, stride, GL_FLOAT, GL_FALSE, offset, 0);
+
+	unsigned int indexBufferObject;
+	glGenBuffers(1, &indexBufferObject);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferObject);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, countIndexBuffer * sizeof(unsigned int), indexBuffer, GL_STATIC_DRAW);
 
 	ShaderProgramSource source = ParseShader("res/shaders/BasicShader.shader");
 
@@ -145,7 +163,7 @@ int main(void)
 		/* Render here */
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, countIndexBuffer, GL_UNSIGNED_INT, nullptr);
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
