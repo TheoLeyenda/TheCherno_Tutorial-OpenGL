@@ -113,6 +113,10 @@ int main(void)
 	if (!glfwInit())
 		return -1;
 
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 	/* Create a windowed mode window and its OpenGL context */
 	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
 	if (!window)
@@ -144,8 +148,9 @@ int main(void)
 	};
 	
 	const int countPositions = 8;
-	const int stride = 2; // cantidad 
-	const int offset = sizeof(float) * 2; // 
+	const int stride = 2;
+	const int offset = 0;
+	const int sizeVertex = sizeof(float) * 2; 
 	const int countVetices = 4;
 
 	unsigned int indexBuffer[] = 
@@ -155,13 +160,17 @@ int main(void)
 	};
 	const int countIndexBuffer = 6;
 
+	unsigned int vao;
+	GLCALL(glGenVertexArrays(1, &vao));
+	GLCALL(glBindVertexArray(vao));
+
 	unsigned int buffer;
 	GLCALL(glGenBuffers(1, &buffer));
 	GLCALL(glBindBuffer(GL_ARRAY_BUFFER, buffer));
 	GLCALL(glBufferData(GL_ARRAY_BUFFER, countPositions * sizeof(float),positions , GL_STATIC_DRAW));
 
 	GLCALL(glEnableVertexAttribArray(0));
-	GLCALL(glVertexAttribPointer(0, stride, GL_FLOAT, GL_FALSE, offset, 0));
+	GLCALL(glVertexAttribPointer(0, stride, GL_FLOAT, GL_FALSE, sizeVertex, offset));
 
 	unsigned int indexBufferObject;
 	GLCALL(glGenBuffers(1, &indexBufferObject));
@@ -181,6 +190,11 @@ int main(void)
 	GLCALL(int location = glGetUniformLocation(shader, "u_Color"));
 	ASSERT(location != -1);
 	
+	GLCALL(glBindVertexArray(0));
+	GLCALL(glUseProgram(0));
+	GLCALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+	GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+
 	float r = 0.0f;
 	float increment = 0.05f;
 	/* Loop until the user closes the window */
@@ -189,7 +203,12 @@ int main(void)
 		/* Render here */
 		GLCALL(glClear(GL_COLOR_BUFFER_BIT));
 
+		GLCALL(glUseProgram(shader));
 		GLCALL(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
+
+		GLCALL(glBindVertexArray(vao));
+		GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferObject));
+
 		GLCALL(glDrawElements(GL_TRIANGLES, countIndexBuffer, GL_UNSIGNED_INT, nullptr));
 
 		if (r > 1.0f)
