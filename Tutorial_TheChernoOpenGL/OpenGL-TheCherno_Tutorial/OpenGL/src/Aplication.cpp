@@ -61,7 +61,7 @@ static ShaderProgramSource  ParseShader(const std::string& filepath)
 
 static unsigned int CompileShader(unsigned int type, const std::string& source)
 {
-	unsigned int id = glCreateShader(type);
+	GLCALL(unsigned int id = glCreateShader(type));
 	const char* src = source.c_str();
 	GLCALL(glShaderSource(id, 1, &src, nullptr));
 	GLCALL(glCompileShader(id));
@@ -89,7 +89,7 @@ static unsigned int CompileShader(unsigned int type, const std::string& source)
 
 static unsigned int CreatedShader(const std::string& vertexShader, const std::string& fragmentShader) 
 {
-	unsigned int program = glCreateProgram();
+	GLCALL(unsigned int program = glCreateProgram());
 	unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
 	unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
 
@@ -123,6 +123,8 @@ int main(void)
 
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
+
+	glfwSwapInterval(1);
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -176,13 +178,26 @@ int main(void)
 	unsigned int shader = CreatedShader(source.vertexSource, source.fragmentSource);
 	GLCALL(glUseProgram(shader));
 
+	GLCALL(int location = glGetUniformLocation(shader, "u_Color"));
+	ASSERT(location != -1);
+	
+	float r = 0.0f;
+	float increment = 0.05f;
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
 		/* Render here */
 		GLCALL(glClear(GL_COLOR_BUFFER_BIT));
 
+		GLCALL(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
 		GLCALL(glDrawElements(GL_TRIANGLES, countIndexBuffer, GL_UNSIGNED_INT, nullptr));
+
+		if (r > 1.0f)
+			increment = -0.05f;
+		else if (r < 0.0f)
+			increment = 0.05f;
+
+		r += increment;
 
 		/* Swap front and back buffers */
 		GLCALL(glfwSwapBuffers(window));
