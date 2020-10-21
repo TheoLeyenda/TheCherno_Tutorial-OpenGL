@@ -204,7 +204,6 @@ int main(void)
 		}
 
 	}
-	//glDeleteShader(shader);
 	glfwTerminate();
 	return 0;
 }
