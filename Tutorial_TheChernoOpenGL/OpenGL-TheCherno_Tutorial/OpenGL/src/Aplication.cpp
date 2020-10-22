@@ -8,7 +8,7 @@
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
-
+#include "VertexArray.h"
 
 struct ShaderProgramSource
 {
@@ -145,14 +145,13 @@ int main(void)
 		};
 		unsigned int countIndexBuffer = 6;
 
-		unsigned int vao;
-		GLCALL(glGenVertexArrays(1, &vao));
-		GLCALL(glBindVertexArray(vao));
-
+		VertexArray vertexArray;
 		VertexBuffer vertexBuffer(positions, countPositions);
 
-		GLCALL(glEnableVertexAttribArray(0));
-		GLCALL(glVertexAttribPointer(0, stride, GL_FLOAT, GL_FALSE, sizeVertex, offset));
+		VertexBufferLayout layout;
+		layout.Push<float>(2);
+		vertexArray.AddBuffer(vertexBuffer, layout);
+		vertexArray.Bind();
 
 		IndexBuffer indexBuffer(indexArray, countIndexBuffer);
 
@@ -167,8 +166,8 @@ int main(void)
 
 		GLCALL(int location = glGetUniformLocation(shader, "u_Color"));
 		ASSERT(location != -1);
-
-		GLCALL(glBindVertexArray(0));
+		
+		vertexArray.Unbind();
 		GLCALL(glUseProgram(0));
 		GLCALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 		GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
@@ -184,9 +183,8 @@ int main(void)
 			GLCALL(glUseProgram(shader));
 			GLCALL(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
 
-			GLCALL(glBindVertexArray(vao));
 			indexBuffer.Bind();
-
+			vertexArray.Bind();
 			GLCALL(glDrawElements(GL_TRIANGLES, countIndexBuffer, GL_UNSIGNED_INT, nullptr));
 
 			if (r > 1.0f)
@@ -204,6 +202,7 @@ int main(void)
 		}
 
 	}
+	//glDeleteShader(shader);
 	glfwTerminate();
 	return 0;
 }
