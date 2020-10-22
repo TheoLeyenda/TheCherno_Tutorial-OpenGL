@@ -11,6 +11,7 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Texture.h"
 
 int main(void)
 {
@@ -48,10 +49,11 @@ int main(void)
 	{
 		float positions[]
 		{
-			-0.5f, -0.5f, //index 0
-			 0.5f, -0.5f, //index 1
-			 0.5f,  0.5f, //index 2
-			-0.5f,  0.5f, //index 3
+					  // texture data
+			-0.5f, -0.5f, 0.0f, 0.0f,//index 0
+			 0.5f, -0.5f, 1.0f, 0.0f,//index 1
+			 0.5f,  0.5f, 1.0f, 1.0f,//index 2
+			-0.5f,  0.5f, 0.0f, 1.0f//index 3
 		};
 
 		unsigned int indexArray[] =
@@ -60,13 +62,17 @@ int main(void)
 			2, 3, 0
 		};
 		
-		const int countPositions = 8 * sizeof(float);
+		GLCALL(glEnable(GL_BLEND));
+		GLCALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+		const int countPositions = 4 * 4 * sizeof(float);
 		unsigned int countIndexBuffer = 6;
 
 		VertexArray vertexArray;
 		VertexBuffer vertexBuffer(positions, countPositions);
 
 		VertexBufferLayout layout;
+		layout.Push<float>(2);
 		layout.Push<float>(2);
 		vertexArray.AddBuffer(vertexBuffer, layout);
 		vertexArray.Bind();
@@ -81,6 +87,10 @@ int main(void)
 		Shader shader("res/shaders/BasicShader.shader");
 		shader.Bind();
 		shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
+
+		Texture texture("res/texturas/bokitaElMasGrandePapa.png");
+		texture.Bind();
+		shader.SetUniform1i("u_Texture", 0);
 
 		vertexArray.Unbind();
 		vertexBuffer.Unbind();
