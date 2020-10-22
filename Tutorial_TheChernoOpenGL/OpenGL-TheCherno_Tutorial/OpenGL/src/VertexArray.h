@@ -1,8 +1,8 @@
 #ifndef VERTEXARRAY
 #define VERTEXARRAY
-
-#include "VertexBufferLayout.h"
 #include "VertexBuffer.h"
+
+class VertexBufferLayout;
 
 class VertexArray 
 {

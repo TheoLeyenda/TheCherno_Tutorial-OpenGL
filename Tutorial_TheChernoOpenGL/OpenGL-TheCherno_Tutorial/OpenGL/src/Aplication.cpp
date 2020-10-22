@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "Renderer.h"
+#include "VertexBufferLayout.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
@@ -53,17 +54,13 @@ int main(void)
 			-0.5f,  0.5f, //index 3
 		};
 
-		const int countPositions = 8 * sizeof(float);
-		const int stride = 2;
-		const int offset = 0;
-		const int sizeVertex = sizeof(float) * 2;
-		const int countVetices = 4;
-
 		unsigned int indexArray[] =
 		{
 			0, 1, 2,
 			2, 3, 0
 		};
+		
+		const int countPositions = 8 * sizeof(float);
 		unsigned int countIndexBuffer = 6;
 
 		VertexArray vertexArray;
@@ -90,20 +87,19 @@ int main(void)
 		indexBuffer.Unbind();
 		shader.Unbind();
 
+		Renderer renderer;
+
 		float r = 0.0f;
 		float increment = 0.05f;
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
 		{
-			/* Render here */
-			GLCALL(glClear(GL_COLOR_BUFFER_BIT));
+			renderer.Clear();
 
 			shader.Bind();
 			shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-
-			indexBuffer.Bind();
-			vertexArray.Bind();
-			GLCALL(glDrawElements(GL_TRIANGLES, countIndexBuffer, GL_UNSIGNED_INT, nullptr));
+			
+			renderer.Draw(vertexArray, indexBuffer, shader);
 
 			if (r > 1.0f)
 				increment = -0.05f;
